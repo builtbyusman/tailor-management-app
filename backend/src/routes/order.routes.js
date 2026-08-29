@@ -13,6 +13,7 @@ import {
     getSummary,
     getMy,
     getMySingle,
+    getClientOrders,
 } from "../controllers/order.controller.js";
 
 import protect from "../middlewares/auth.middleware.js";
@@ -107,6 +108,13 @@ router.get(
     protect,
     authorize("TAILOR"),
     getSingle
+);
+
+router.get(
+    "/client/:clientId",
+    protect,
+    authorize("TAILOR"),
+    getClientOrders
 );
 
 // Update order

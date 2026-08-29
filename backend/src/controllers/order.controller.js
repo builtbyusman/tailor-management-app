@@ -11,6 +11,7 @@ import {
     getOrderSummary,
     getMyOrders,
     getMyOrderById,
+    getOrdersByClient,
 } from "../services/order.service.js";
 
 // ==========================================
@@ -434,6 +435,41 @@ const getMySingle = async (req, res) => {
     }
 };
 
+const getClientOrders = async (req, res) => {
+    try {
+        const { clientId } = req.params;
+
+        const result = await getOrdersByClient(
+            clientId,
+            req.user.userId
+        );
+
+        if (result.error === "CLIENT_NOT_FOUND") {
+            return res.status(404).json({
+                message: "Client not found",
+            });
+        }
+
+        return res.status(200).json({
+            message:
+                "Client orders fetched successfully",
+
+            orders: result.orders,
+        });
+
+    } catch (error) {
+        console.error(
+            "Get client orders error:",
+            error
+        );
+
+        return res.status(500).json({
+            message:
+                "Internal server error",
+        });
+    }
+};
+
 export {
     create,
     getAll,
@@ -447,4 +483,5 @@ export {
     getSummary,
     getMy,
     getMySingle,
+    getClientOrders,
 };

@@ -620,6 +620,44 @@ const getMyOrders = async (
 // GET MY SINGLE ORDER - CLIENT
 // ==========================================
 
+
+// ==========================================
+// GET ORDERS BY CLIENT - TAILOR
+// ==========================================
+
+const getOrdersByClient = async (
+    clientId,
+    tailorId
+) => {
+    const client = await Client.findOne({
+        _id: clientId,
+        tailor: tailorId,
+    });
+
+    if (!client) {
+        return {
+            error: "CLIENT_NOT_FOUND",
+        };
+    }
+
+    const orders = await Order.find({
+        client: clientId,
+        tailor: tailorId,
+    })
+        .populate(
+            "client",
+            "name phone email"
+        )
+        .sort({
+            createdAt: -1,
+        });
+
+    return {
+        orders,
+    };
+};
+
+
 const getMyOrderById = async (
     userId,
     orderId
@@ -666,4 +704,5 @@ export {
     getOrderSummary,
     getMyOrders,
     getMyOrderById,
+    getOrdersByClient,
 };
