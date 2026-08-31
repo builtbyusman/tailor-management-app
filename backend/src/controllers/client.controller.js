@@ -12,12 +12,14 @@ import {
 // ==========================================
 
 const create = async (req, res) => {
+
     try {
 
         const {
             name,
             phone,
             email,
+            password,
             address,
             gender,
             notes,
@@ -29,9 +31,49 @@ const create = async (req, res) => {
         // ======================================
 
         if (!name || !phone) {
+
             return res.status(400).json({
                 message:
                     "Client name and phone are required",
+            });
+        }
+
+
+        // ======================================
+        // EMAIL REQUIRED
+        // ======================================
+
+        if (!email) {
+
+            return res.status(400).json({
+                message:
+                    "Client email is required",
+            });
+        }
+
+
+        // ======================================
+        // PASSWORD REQUIRED
+        // ======================================
+
+        if (!password) {
+
+            return res.status(400).json({
+                message:
+                    "Client password is required",
+            });
+        }
+
+
+        // ======================================
+        // PASSWORD LENGTH
+        // ======================================
+
+        if (password.length < 6) {
+
+            return res.status(400).json({
+                message:
+                    "Client password must be at least 6 characters",
             });
         }
 
@@ -41,9 +83,12 @@ const create = async (req, res) => {
         // ======================================
 
         const result = await createClient({
+
             name,
             phone,
             email,
+            password,
+
             address,
             gender,
             notes,
@@ -58,10 +103,14 @@ const create = async (req, res) => {
         // ======================================
 
         return res.status(201).json({
+
             message:
-                "Client created successfully",
+                "Client account created successfully",
 
             client: result.client,
+
+            user: result.user,
+
         });
 
     } catch (error) {
@@ -70,6 +119,72 @@ const create = async (req, res) => {
             "Create client error:",
             error
         );
+
+
+        // ======================================
+        // DUPLICATE EMAIL
+        // ======================================
+
+        if (
+            error.code ===
+            "EMAIL_ALREADY_EXISTS"
+        ) {
+
+            return res.status(409).json({
+                message:
+                    "This email is already registered",
+            });
+        }
+
+
+        // ======================================
+        // EMAIL REQUIRED
+        // ======================================
+
+        if (
+            error.code ===
+            "CLIENT_EMAIL_REQUIRED"
+        ) {
+
+            return res.status(400).json({
+                message:
+                    "Client email is required",
+            });
+        }
+
+
+        // ======================================
+        // PASSWORD REQUIRED
+        // ======================================
+
+        if (
+            error.code ===
+            "CLIENT_PASSWORD_REQUIRED"
+        ) {
+
+            return res.status(400).json({
+                message:
+                    "Client password is required",
+            });
+        }
+
+
+        // ======================================
+        // MONGOOSE DUPLICATE
+        // ======================================
+
+        if (error.code === 11000) {
+
+            return res.status(409).json({
+                message:
+                    "Client account already exists",
+            });
+        }
+
+
+        // ======================================
+        // SERVER ERROR
+        // ======================================
 
         return res.status(500).json({
             message:
@@ -84,18 +199,22 @@ const create = async (req, res) => {
 // ==========================================
 
 const getAll = async (req, res) => {
+
     try {
 
-        const clients = await getClients(
-            req.user.userId
-        );
+        const clients =
+            await getClients(
+                req.user.userId
+            );
 
 
         return res.status(200).json({
+
             message:
                 "Clients fetched successfully",
 
-            count: clients.length,
+            count:
+                clients.length,
 
             clients,
         });
@@ -106,6 +225,7 @@ const getAll = async (req, res) => {
             "Get clients error:",
             error
         );
+
 
         return res.status(500).json({
             message:
@@ -120,18 +240,22 @@ const getAll = async (req, res) => {
 // ==========================================
 
 const getSingle = async (req, res) => {
+
     try {
 
-        const { id } = req.params;
+        const { id } =
+            req.params;
 
 
-        const client = await getClientById(
-            id,
-            req.user.userId
-        );
+        const client =
+            await getClientById(
+                id,
+                req.user.userId
+            );
 
 
         if (!client) {
+
             return res.status(404).json({
                 message:
                     "Client not found",
@@ -140,6 +264,7 @@ const getSingle = async (req, res) => {
 
 
         return res.status(200).json({
+
             message:
                 "Client fetched successfully",
 
@@ -152,6 +277,7 @@ const getSingle = async (req, res) => {
             "Get client error:",
             error
         );
+
 
         return res.status(500).json({
             message:
@@ -166,9 +292,11 @@ const getSingle = async (req, res) => {
 // ==========================================
 
 const update = async (req, res) => {
+
     try {
 
-        const { id } = req.params;
+        const { id } =
+            req.params;
 
 
         const {
@@ -192,7 +320,7 @@ const update = async (req, res) => {
 
 
         // ======================================
-        // REMOVE UNDEFINED FIELDS
+        // REMOVE UNDEFINED
         // ======================================
 
         Object.keys(updateData).forEach(
@@ -202,6 +330,7 @@ const update = async (req, res) => {
                     updateData[key] ===
                     undefined
                 ) {
+
                     delete updateData[key];
                 }
             }
@@ -209,17 +338,19 @@ const update = async (req, res) => {
 
 
         // ======================================
-        // UPDATE
+        // UPDATE CLIENT
         // ======================================
 
-        const client = await updateClient(
-            id,
-            req.user.userId,
-            updateData
-        );
+        const client =
+            await updateClient(
+                id,
+                req.user.userId,
+                updateData
+            );
 
 
         if (!client) {
+
             return res.status(404).json({
                 message:
                     "Client not found",
@@ -228,6 +359,7 @@ const update = async (req, res) => {
 
 
         return res.status(200).json({
+
             message:
                 "Client updated successfully",
 
@@ -240,6 +372,7 @@ const update = async (req, res) => {
             "Update client error:",
             error
         );
+
 
         return res.status(500).json({
             message:
@@ -254,18 +387,22 @@ const update = async (req, res) => {
 // ==========================================
 
 const remove = async (req, res) => {
+
     try {
 
-        const { id } = req.params;
+        const { id } =
+            req.params;
 
 
-        const client = await deleteClient(
-            id,
-            req.user.userId
-        );
+        const client =
+            await deleteClient(
+                id,
+                req.user.userId
+            );
 
 
         if (!client) {
+
             return res.status(404).json({
                 message:
                     "Client not found",
@@ -274,8 +411,9 @@ const remove = async (req, res) => {
 
 
         return res.status(200).json({
+
             message:
-                "Client deleted successfully",
+                "Client and account deleted successfully",
         });
 
     } catch (error) {
@@ -284,6 +422,7 @@ const remove = async (req, res) => {
             "Delete client error:",
             error
         );
+
 
         return res.status(500).json({
             message:
