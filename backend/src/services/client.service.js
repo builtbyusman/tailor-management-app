@@ -1,141 +1,90 @@
-import bcrypt from "bcryptjs";
-
 import Client from "../models/Client.js";
 import User from "../models/User.js";
 
-
 // ==========================================
-// CREATE CLIENT + CLIENT USER ACCOUNT
+// CREATE CLIENT PROFILE - TAILOR
 // ==========================================
 
 const createClient = async ({
     name,
     phone,
     email,
-    password,
     address,
     gender,
     notes,
     tailorId,
 }) => {
 
-    // ======================================
-    // EMAIL REQUIRED FOR LOGIN
-    // ======================================
+    let clientUser = null;
 
-    if (!email) {
-        const error = new Error(
-            "Client email is required for account creation"
-        );
+    // ==========================================
+    // FIND CLIENT USER ACCOUNT
+    // ==========================================
 
-        error.code = "CLIENT_EMAIL_REQUIRED";
-
-        throw error;
-    }
-
-
-    // ======================================
-    // PASSWORD REQUIRED
-    // ======================================
-
-    if (!password) {
-        const error = new Error(
-            "Client password is required"
-        );
-
-        error.code = "CLIENT_PASSWORD_REQUIRED";
-
-        throw error;
-    }
-
-
-    // ======================================
-    // CHECK EMAIL
-    // ======================================
-
-    const existingUser = await User.findOne({
-        email: email.toLowerCase().trim(),
-    });
-
-    if (existingUser) {
-
-        const error = new Error(
-            "Email is already registered"
-        );
-
-        error.code = "EMAIL_ALREADY_EXISTS";
-
-        throw error;
-    }
-
-
-    // ======================================
-    // HASH PASSWORD
-    // ======================================
-
-    const hashedPassword =
-        await bcrypt.hash(password, 10);
-
-
-    // ======================================
-    // CREATE CLIENT USER ACCOUNT
-    // ======================================
-
-    const user = await User.create({
-        name: name.trim(),
-        email: email.toLowerCase().trim(),
-        password: hashedPassword,
-        role: "CLIENT",
-    });
-
-
-    // ======================================
-    // CREATE CLIENT PROFILE
-    // ======================================
-
-    try {
-
-        const client = await Client.create({
-            user: user._id,
-
-            tailor: tailorId,
-
-            name,
-            phone,
-            email,
-            address,
-            gender,
-            notes,
+    if (email) {
+        clientUser = await User.findOne({
+            email: email.toLowerCase().trim(),
         });
 
+        // If email exists but belongs to non-client
+        if (
+            clientUser &&
+            clientUser.role !== "CLIENT"
+        ) {
+            return {
+                error: "INVALID_USER_ROLE",
+            };
+        }
 
-        return {
-            client,
-            user: {
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-            },
-        };
+        // ========================================
+        // CHECK EXISTING CLIENT PROFILE
+        // ========================================
 
-    } catch (error) {
+        if (clientUser) {
+            const existingClient = await Client.findOne({
+                user: clientUser._id,
+            });
 
-        // ==================================
-        // ROLLBACK USER
-        // ==================================
-
-        await User.findByIdAndDelete(
-            user._id
-        );
-
-        throw error;
+            if (existingClient) {
+                return {
+                    error: "CLIENT_PROFILE_EXISTS",
+                };
+            }
+        }
     }
+
+    // ==========================================
+    // CREATE CLIENT PROFILE
+    // ==========================================
+
+    const client = await Client.create({
+        user: clientUser
+            ? clientUser._id
+            : undefined,
+
+        name,
+        phone,
+        email,
+        address,
+        gender,
+        notes,
+
+        tailor: tailorId,
+    });
+
+    // ==========================================
+    // RETURN
+    // ==========================================
+
+    return {
+        client,
+        user: clientUser,
+    };
 };
 
 
 // ==========================================
-// GET ALL CLIENTS
+// GET ALL CLIENTS - TAILOR
 // ==========================================
 
 const getClients = async (tailorId) => {
@@ -156,7 +105,7 @@ const getClients = async (tailorId) => {
 
 
 // ==========================================
-// GET SINGLE CLIENT
+// GET SINGLE CLIENT - TAILOR
 // ==========================================
 
 const getClientById = async (
@@ -177,7 +126,7 @@ const getClientById = async (
 
 
 // ==========================================
-// UPDATE CLIENT
+// UPDATE CLIENT - TAILOR
 // ==========================================
 
 const updateClient = async (
@@ -186,29 +135,27 @@ const updateClient = async (
     updateData
 ) => {
 
-    const client =
-        await Client.findOneAndUpdate(
-            {
-                _id: clientId,
-                tailor: tailorId,
-            },
-            updateData,
-            {
-                new: true,
-                runValidators: true,
-            }
-        )
-        .populate(
-            "user",
-            "name email role"
-        );
+    const client = await Client.findOneAndUpdate(
+        {
+            _id: clientId,
+            tailor: tailorId,
+        },
+        updateData,
+        {
+            new: true,
+            runValidators: true,
+        }
+    ).populate(
+        "user",
+        "name email role"
+    );
 
     return client;
 };
 
 
 // ==========================================
-// DELETE CLIENT
+// DELETE CLIENT - TAILOR
 // ==========================================
 
 const deleteClient = async (
@@ -216,22 +163,10 @@ const deleteClient = async (
     tailorId
 ) => {
 
-    const client =
-        await Client.findOneAndDelete({
-            _id: clientId,
-            tailor: tailorId,
-        });
-
-    // ======================================
-    // DELETE LINKED USER ACCOUNT
-    // ======================================
-
-    if (client?.user) {
-
-        await User.findByIdAndDelete(
-            client.user
-        );
-    }
+    const client = await Client.findOneAndDelete({
+        _id: clientId,
+        tailor: tailorId,
+    });
 
     return client;
 };
