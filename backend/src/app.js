@@ -18,8 +18,6 @@ const app = express();
 |--------------------------------------------------------------------------
 | CORS
 |--------------------------------------------------------------------------
-| Allow React frontend running on localhost during development.
-|--------------------------------------------------------------------------
 */
 
 app.use(
@@ -45,7 +43,8 @@ app.use(express.json());
 
 app.get("/", (req, res) => {
     res.json({
-        message: "Tailoring Management API is running",
+        message:
+            "Tailoring Management API is running",
     });
 });
 
@@ -55,7 +54,10 @@ app.get("/", (req, res) => {
 |--------------------------------------------------------------------------
 */
 
-app.use("/api/auth", authRoutes);
+app.use(
+    "/api/auth",
+    authRoutes
+);
 
 /*
 |--------------------------------------------------------------------------
@@ -68,7 +70,8 @@ app.get(
     protect,
     (req, res) => {
         res.json({
-            message: "You are authenticated",
+            message:
+                "You are authenticated",
             user: req.user,
         });
     }
@@ -86,7 +89,8 @@ app.get(
     authorize("TAILOR"),
     (req, res) => {
         res.json({
-            message: "Welcome to Tailor Dashboard",
+            message:
+                "Welcome to Tailor Dashboard",
             user: req.user,
         });
     }
@@ -98,7 +102,10 @@ app.get(
 |--------------------------------------------------------------------------
 */
 
-app.use("/api/clients", clientRoutes);
+app.use(
+    "/api/clients",
+    clientRoutes
+);
 
 /*
 |--------------------------------------------------------------------------
@@ -106,7 +113,10 @@ app.use("/api/clients", clientRoutes);
 |--------------------------------------------------------------------------
 */
 
-app.use("/api/measurements", measurementRoutes);
+app.use(
+    "/api/measurements",
+    measurementRoutes
+);
 
 /*
 |--------------------------------------------------------------------------
@@ -114,7 +124,10 @@ app.use("/api/measurements", measurementRoutes);
 |--------------------------------------------------------------------------
 */
 
-app.use("/api/orders", orderRoutes);
+app.use(
+    "/api/orders",
+    orderRoutes
+);
 
 /*
 |--------------------------------------------------------------------------
@@ -122,7 +135,10 @@ app.use("/api/orders", orderRoutes);
 |--------------------------------------------------------------------------
 */
 
-app.use("/api/dashboard", dashboardRoutes);
+app.use(
+    "/api/dashboard",
+    dashboardRoutes
+);
 
 /*
 |--------------------------------------------------------------------------
@@ -130,7 +146,10 @@ app.use("/api/dashboard", dashboardRoutes);
 |--------------------------------------------------------------------------
 */
 
-app.use("/api/payments", paymentRoutes);
+app.use(
+    "/api/payments",
+    paymentRoutes
+);
 
 /*
 |--------------------------------------------------------------------------
@@ -139,7 +158,7 @@ app.use("/api/payments", paymentRoutes);
 */
 
 app.use(
-    "/api/client/orders",
+    "/api/client-orders",
     clientOrderRoutes
 );
 
