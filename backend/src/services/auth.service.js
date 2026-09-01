@@ -2,18 +2,41 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-const registerUser = async ({ name, email, password, role }) => {
-    const existingUser = await User.findOne({ email });
+
+// ==========================================
+// REGISTER
+// ==========================================
+
+const registerUser = async ({
+    name,
+    email,
+    password,
+    role,
+}) => {
+
+    const normalizedEmail =
+        email.trim().toLowerCase();
+
+    const existingUser =
+        await User.findOne({
+            email: normalizedEmail,
+        });
 
     if (existingUser) {
-        throw new Error("User with this email already exists");
+        throw new Error(
+            "User with this email already exists"
+        );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword =
+        await bcrypt.hash(
+            password,
+            10
+        );
 
     const user = await User.create({
         name,
-        email,
+        email: normalizedEmail,
         password: hashedPassword,
         role,
     });
@@ -26,35 +49,62 @@ const registerUser = async ({ name, email, password, role }) => {
     };
 };
 
-const loginUser = async ({ email, password }) => {
-    const user = await User.findOne({ email });
+
+// ==========================================
+// LOGIN
+// ==========================================
+
+const loginUser = async ({
+    email,
+    password,
+}) => {
+
+    const normalizedEmail =
+        email.trim().toLowerCase();
+
+    const user =
+        await User.findOne({
+            email: normalizedEmail,
+        });
 
     if (!user) {
-        throw new Error("Invalid email or password");
+        throw new Error(
+            "Invalid email or password"
+        );
     }
 
-    const isPasswordCorrect = await bcrypt.compare(
-        password,
-        user.password
-    );
+    const isPasswordCorrect =
+        await bcrypt.compare(
+            password,
+            user.password
+        );
 
     if (!isPasswordCorrect) {
-        throw new Error("Invalid email or password");
+        throw new Error(
+            "Invalid email or password"
+        );
     }
 
     const token = jwt.sign(
         {
-            userId: user._id.toString(),
+            userId:
+                user._id.toString(),
+
             role: user.role,
         },
+
         process.env.JWT_SECRET,
+
         {
-            expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+            expiresIn:
+                process.env.JWT_EXPIRES_IN ||
+                "7d",
         }
     );
 
     return {
         token,
+
         user: {
             id: user._id,
             name: user.name,
@@ -64,4 +114,8 @@ const loginUser = async ({ email, password }) => {
     };
 };
 
-export { registerUser, loginUser };
+
+export {
+    registerUser,
+    loginUser,
+};
