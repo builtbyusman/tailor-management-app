@@ -5,7 +5,7 @@ import {
 
 
 // ==========================================
-// GET MY ORDERS
+// GET MY ORDERS - CLIENT
 // ==========================================
 
 const getOrders = async (req, res) => {
@@ -15,6 +15,9 @@ const getOrders = async (req, res) => {
             req.user.userId
         );
 
+        // ======================================
+        // CLIENT PROFILE NOT FOUND
+        // ======================================
 
         if (
             result.error ===
@@ -22,15 +25,20 @@ const getOrders = async (req, res) => {
         ) {
             return res.status(404).json({
                 message:
-                    "Client profile not linked to this account",
+                    "Client profile not found",
                 orders: [],
             });
         }
 
+        // ======================================
+        // SUCCESS
+        // ======================================
 
         return res.status(200).json({
             message:
                 "Your orders fetched successfully",
+
+            count: result.orders.length,
 
             orders: result.orders,
         });
@@ -51,23 +59,26 @@ const getOrders = async (req, res) => {
 
 
 // ==========================================
-// GET MY SINGLE ORDER
+// GET MY SINGLE ORDER - CLIENT
 // ==========================================
 
 const getSingleOrder = async (
     req,
     res
 ) => {
+
     try {
 
         const { orderId } = req.params;
-
 
         const result = await getMyOrder(
             orderId,
             req.user.userId
         );
 
+        // ======================================
+        // CLIENT PROFILE NOT FOUND
+        // ======================================
 
         if (
             result.error ===
@@ -75,10 +86,13 @@ const getSingleOrder = async (
         ) {
             return res.status(404).json({
                 message:
-                    "Client profile not linked to this account",
+                    "Client profile not found",
             });
         }
 
+        // ======================================
+        // ORDER NOT FOUND
+        // ======================================
 
         if (
             result.error ===
@@ -90,6 +104,9 @@ const getSingleOrder = async (
             });
         }
 
+        // ======================================
+        // SUCCESS
+        // ======================================
 
         return res.status(200).json({
             message:

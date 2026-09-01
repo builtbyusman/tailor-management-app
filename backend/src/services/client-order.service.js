@@ -1,31 +1,18 @@
 import Order from "../models/Order.js";
 import Client from "../models/Client.js";
 
-
 // ==========================================
-// GET LOGGED-IN CLIENT PROFILE
+// GET MY ORDERS - CLIENT
 // ==========================================
 
-const getClientProfile = async (userId) => {
+const getMyOrders = async (userId) => {
+    // ======================================
+    // FIND CLIENT PROFILE USING USER ID
+    // ======================================
 
     const client = await Client.findOne({
         user: userId,
     });
-
-    return client;
-};
-
-
-// ==========================================
-// GET MY ORDERS
-// ==========================================
-
-const getMyOrders = async (userId) => {
-
-    // Find Client using logged-in User
-    const client = await getClientProfile(
-        userId
-    );
 
     if (!client) {
         return {
@@ -34,8 +21,10 @@ const getMyOrders = async (userId) => {
         };
     }
 
+    // ======================================
+    // FIND ORDERS USING CLIENT._id
+    // ======================================
 
-    // Find orders using Client _id
     const orders = await Order.find({
         client: client._id,
     })
@@ -54,7 +43,7 @@ const getMyOrders = async (userId) => {
 
 
 // ==========================================
-// GET MY SINGLE ORDER
+// GET MY SINGLE ORDER - CLIENT
 // ==========================================
 
 const getMyOrder = async (
@@ -62,10 +51,13 @@ const getMyOrder = async (
     userId
 ) => {
 
-    // Find client profile
-    const client = await getClientProfile(
-        userId
-    );
+    // ======================================
+    // FIND CLIENT PROFILE
+    // ======================================
+
+    const client = await Client.findOne({
+        user: userId,
+    });
 
     if (!client) {
         return {
@@ -73,8 +65,10 @@ const getMyOrder = async (
         };
     }
 
+    // ======================================
+    // FIND ORDER
+    // ======================================
 
-    // Find order belonging to this client
     const order = await Order.findOne({
         _id: orderId,
         client: client._id,
@@ -84,23 +78,17 @@ const getMyOrder = async (
             "name phone email"
         );
 
-
     if (!order) {
         return {
             error: "ORDER_NOT_FOUND",
         };
     }
 
-
     return {
         order,
     };
 };
 
-
-// ==========================================
-// EXPORTS
-// ==========================================
 
 export {
     getMyOrders,
