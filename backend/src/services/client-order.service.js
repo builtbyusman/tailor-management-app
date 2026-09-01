@@ -1,58 +1,40 @@
-import Order from "../models/Order.js";
 import Client from "../models/Client.js";
+import Order from "../models/Order.js";
+
+// ==========================================
+// GET MY ORDERS - CLIENT
+// ==========================================
 
 const getMyOrders = async (userId) => {
-
-    console.log("================================");
-    console.log("CLIENT ORDERS DEBUG");
-    console.log("Logged in User ID:", userId);
-
-    // Find client profile
+    // Logged-in User ko Client profile se find karo
     const client = await Client.findOne({
         user: userId,
     });
 
-    console.log("Client found:", client);
-
     if (!client) {
-        console.log(
-            "❌ NO CLIENT PROFILE FOR THIS USER"
-        );
-
         return {
             error: "CLIENT_NOT_FOUND",
             orders: [],
         };
     }
 
-    console.log(
-        "✅ Client ID:",
-        client._id.toString()
-    );
-
-    // Find orders
+    // IMPORTANT:
+    // Order.client = Client._id
+    // NOT User._id
     const orders = await Order.find({
         client: client._id,
     })
         .populate(
             "client",
-            "name phone email"
+            "name phone email address gender"
+        )
+        .populate(
+            "tailor",
+            "name email"
         )
         .sort({
             createdAt: -1,
         });
-
-    console.log(
-        "Orders found:",
-        orders.length
-    );
-
-    console.log(
-        "Orders:",
-        orders
-    );
-
-    console.log("================================");
 
     return {
         orders,
@@ -60,11 +42,15 @@ const getMyOrders = async (userId) => {
 };
 
 
+// ==========================================
+// GET MY SINGLE ORDER - CLIENT
+// ==========================================
+
 const getMyOrder = async (
     orderId,
     userId
 ) => {
-
+    // First find Client profile
     const client = await Client.findOne({
         user: userId,
     });
@@ -75,13 +61,18 @@ const getMyOrder = async (
         };
     }
 
+    // Then find order belonging to that Client
     const order = await Order.findOne({
         _id: orderId,
         client: client._id,
     })
         .populate(
             "client",
-            "name phone email"
+            "name phone email address gender"
+        )
+        .populate(
+            "tailor",
+            "name email"
         );
 
     if (!order) {

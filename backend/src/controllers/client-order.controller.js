@@ -5,7 +5,7 @@ import {
 
 
 // ==========================================
-// GET MY ORDERS - CLIENT
+// GET MY ORDERS
 // ==========================================
 
 const getOrders = async (req, res) => {
@@ -15,24 +15,16 @@ const getOrders = async (req, res) => {
             req.user.userId
         );
 
-        // ======================================
-        // CLIENT PROFILE NOT FOUND
-        // ======================================
-
         if (
             result.error ===
             "CLIENT_NOT_FOUND"
         ) {
             return res.status(404).json({
                 message:
-                    "Client profile not found",
+                    "Client profile not found for this account",
                 orders: [],
             });
         }
-
-        // ======================================
-        // SUCCESS
-        // ======================================
 
         return res.status(200).json({
             message:
@@ -59,7 +51,7 @@ const getOrders = async (req, res) => {
 
 
 // ==========================================
-// GET MY SINGLE ORDER - CLIENT
+// GET MY SINGLE ORDER
 // ==========================================
 
 const getSingleOrder = async (
@@ -76,23 +68,15 @@ const getSingleOrder = async (
             req.user.userId
         );
 
-        // ======================================
-        // CLIENT PROFILE NOT FOUND
-        // ======================================
-
         if (
             result.error ===
             "CLIENT_NOT_FOUND"
         ) {
             return res.status(404).json({
                 message:
-                    "Client profile not found",
+                    "Client profile not found for this account",
             });
         }
-
-        // ======================================
-        // ORDER NOT FOUND
-        // ======================================
 
         if (
             result.error ===
@@ -103,10 +87,6 @@ const getSingleOrder = async (
                     "Order not found",
             });
         }
-
-        // ======================================
-        // SUCCESS
-        // ======================================
 
         return res.status(200).json({
             message:
