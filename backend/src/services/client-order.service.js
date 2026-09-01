@@ -1,30 +1,36 @@
 import Order from "../models/Order.js";
 import Client from "../models/Client.js";
 
-// ==========================================
-// GET MY ORDERS - CLIENT
-// ==========================================
-
 const getMyOrders = async (userId) => {
-    // ======================================
-    // FIND CLIENT PROFILE USING USER ID
-    // ======================================
 
+    console.log("================================");
+    console.log("CLIENT ORDERS DEBUG");
+    console.log("Logged in User ID:", userId);
+
+    // Find client profile
     const client = await Client.findOne({
         user: userId,
     });
 
+    console.log("Client found:", client);
+
     if (!client) {
+        console.log(
+            "❌ NO CLIENT PROFILE FOR THIS USER"
+        );
+
         return {
             error: "CLIENT_NOT_FOUND",
             orders: [],
         };
     }
 
-    // ======================================
-    // FIND ORDERS USING CLIENT._id
-    // ======================================
+    console.log(
+        "✅ Client ID:",
+        client._id.toString()
+    );
 
+    // Find orders
     const orders = await Order.find({
         client: client._id,
     })
@@ -36,24 +42,28 @@ const getMyOrders = async (userId) => {
             createdAt: -1,
         });
 
+    console.log(
+        "Orders found:",
+        orders.length
+    );
+
+    console.log(
+        "Orders:",
+        orders
+    );
+
+    console.log("================================");
+
     return {
         orders,
     };
 };
 
 
-// ==========================================
-// GET MY SINGLE ORDER - CLIENT
-// ==========================================
-
 const getMyOrder = async (
     orderId,
     userId
 ) => {
-
-    // ======================================
-    // FIND CLIENT PROFILE
-    // ======================================
 
     const client = await Client.findOne({
         user: userId,
@@ -64,10 +74,6 @@ const getMyOrder = async (
             error: "CLIENT_NOT_FOUND",
         };
     }
-
-    // ======================================
-    // FIND ORDER
-    // ======================================
 
     const order = await Order.findOne({
         _id: orderId,
