@@ -3,14 +3,12 @@ import {
     getMyOrder,
 } from "../services/client-order.service.js";
 
-
 // ==========================================
 // GET MY ORDERS
 // ==========================================
 
 const getOrders = async (req, res) => {
     try {
-
         const result = await getMyOrders(
             req.user.userId
         );
@@ -30,13 +28,14 @@ const getOrders = async (req, res) => {
             message:
                 "Your orders fetched successfully",
 
-            count: result.orders.length,
+            count:
+                result.orders.length,
 
-            orders: result.orders,
+            orders:
+                result.orders,
         });
 
     } catch (error) {
-
         console.error(
             "Client orders error:",
             error
@@ -58,15 +57,15 @@ const getSingleOrder = async (
     req,
     res
 ) => {
-
     try {
+        const { orderId } =
+            req.params;
 
-        const { orderId } = req.params;
-
-        const result = await getMyOrder(
-            orderId,
-            req.user.userId
-        );
+        const result =
+            await getMyOrder(
+                orderId,
+                req.user.userId
+            );
 
         if (
             result.error ===
@@ -92,11 +91,11 @@ const getSingleOrder = async (
             message:
                 "Your order fetched successfully",
 
-            order: result.order,
+            order:
+                result.order,
         });
 
     } catch (error) {
-
         console.error(
             "Client single order error:",
             error
@@ -109,6 +108,10 @@ const getSingleOrder = async (
     }
 };
 
+
+// ==========================================
+// EXPORTS
+// ==========================================
 
 export {
     getOrders,

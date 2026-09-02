@@ -10,7 +10,6 @@ import authorize from "../middlewares/role.middleware.js";
 
 const router = express.Router();
 
-
 // ==========================================
 // CLIENT → MY ORDERS
 // ==========================================
@@ -22,7 +21,6 @@ router.get(
     getOrders
 );
 
-
 // ==========================================
 // CLIENT → SINGLE ORDER
 // ==========================================
@@ -33,6 +31,5 @@ router.get(
     authorize("CLIENT"),
     getSingleOrder
 );
-
 
 export default router;

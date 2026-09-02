@@ -6,7 +6,11 @@ import Order from "../models/Order.js";
 // ==========================================
 
 const getMyOrders = async (userId) => {
-    // Logged-in User ko Client profile se find karo
+    // ==========================================
+    // STEP 1
+    // Logged-in User se Client profile find karo
+    // ==========================================
+
     const client = await Client.findOne({
         user: userId,
     });
@@ -18,9 +22,11 @@ const getMyOrders = async (userId) => {
         };
     }
 
-    // IMPORTANT:
-    // Order.client = Client._id
-    // NOT User._id
+    // ==========================================
+    // STEP 2
+    // Client._id ke against orders find karo
+    // ==========================================
+
     const orders = await Order.find({
         client: client._id,
     })
@@ -50,7 +56,11 @@ const getMyOrder = async (
     orderId,
     userId
 ) => {
-    // First find Client profile
+    // ==========================================
+    // STEP 1
+    // Logged-in User → Client
+    // ==========================================
+
     const client = await Client.findOne({
         user: userId,
     });
@@ -61,7 +71,11 @@ const getMyOrder = async (
         };
     }
 
-    // Then find order belonging to that Client
+    // ==========================================
+    // STEP 2
+    // Order must belong to this Client
+    // ==========================================
+
     const order = await Order.findOne({
         _id: orderId,
         client: client._id,
@@ -86,6 +100,10 @@ const getMyOrder = async (
     };
 };
 
+
+// ==========================================
+// EXPORTS
+// ==========================================
 
 export {
     getMyOrders,
