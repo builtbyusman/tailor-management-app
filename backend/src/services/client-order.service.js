@@ -1,93 +1,65 @@
-import Client from "../models/Client.js";
 import Order from "../models/Order.js";
+import Client from "../models/Client.js";
 
 // ==========================================
-// GET MY ORDERS - CLIENT
+// GET LOGGED-IN CLIENT ORDERS
 // ==========================================
 
 const getMyOrders = async (userId) => {
-    // ==========================================
-    // STEP 1
-    // Logged-in User se Client profile find karo
-    // ==========================================
-
+    // req.user.userId is User._id
+    // Order.client stores Client._id
+    // So first find the Client profile
     const client = await Client.findOne({
         user: userId,
     });
 
+    // Client profile does not exist
     if (!client) {
-        return {
-            error: "CLIENT_NOT_FOUND",
-            orders: [],
-        };
+        return [];
     }
-
-    // ==========================================
-    // STEP 2
-    // Client._id ke against orders find karo
-    // ==========================================
 
     const orders = await Order.find({
         client: client._id,
     })
         .populate(
             "client",
-            "name phone email address gender"
-        )
-        .populate(
-            "tailor",
-            "name email"
+            "name phone email"
         )
         .sort({
             createdAt: -1,
         });
 
-    return {
-        orders,
-    };
+    return orders;
 };
 
 
 // ==========================================
-// GET MY SINGLE ORDER - CLIENT
+// GET SINGLE LOGGED-IN CLIENT ORDER
 // ==========================================
 
 const getMyOrder = async (
     orderId,
     userId
 ) => {
-    // ==========================================
-    // STEP 1
-    // Logged-in User → Client
-    // ==========================================
-
+    // Find Client profile using logged-in User ID
     const client = await Client.findOne({
         user: userId,
     });
 
     if (!client) {
         return {
-            error: "CLIENT_NOT_FOUND",
+            error: "ORDER_NOT_FOUND",
         };
     }
 
-    // ==========================================
-    // STEP 2
-    // Order must belong to this Client
-    // ==========================================
-
+    // Find order belonging to this Client
     const order = await Order.findOne({
         _id: orderId,
         client: client._id,
-    })
-        .populate(
-            "client",
-            "name phone email address gender"
-        )
-        .populate(
-            "tailor",
-            "name email"
-        );
+    }).populate(
+        "client",
+        "name phone email"
+    );
 
     if (!order) {
         return {
@@ -100,10 +72,6 @@ const getMyOrder = async (
     };
 };
 
-
-// ==========================================
-// EXPORTS
-// ==========================================
 
 export {
     getMyOrders,
